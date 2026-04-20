@@ -13,12 +13,13 @@ extern const std::array<double, 59> AN;   // a_n
 extern const std::array<int, 59> BN;      // b_n
 extern const std::array<int, 59> CN;      // c_n
 extern const std::array<int, 59> KN;      // k_n
+extern const std::array<double, 59> UN;   // u_n
 extern const std::array<int, 59> GN;      // g_n
 extern const std::array<int, 59> QN;      // q_n
 extern const std::array<int, 59> FN;      // f_n
 extern const std::array<int, 59> SN;      // s_n
 extern const std::array<int, 59> WN;      // w_n
-extern const std::array<double, 59> UN;   // u_n
+
 
 // ============================================================================
 // Таблица D.2 - Параметры компонентов (21 компонент)
