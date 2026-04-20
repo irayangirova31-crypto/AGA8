@@ -1,0 +1,4 @@
+/Users/irayangirova/aga8_pvt_calculator/build/CMakeFiles/aga8_pvt_calculator.dir
+/Users/irayangirova/aga8_pvt_calculator/build/CMakeFiles/test_aga8_pvt.dir
+/Users/irayangirova/aga8_pvt_calculator/build/CMakeFiles/edit_cache.dir
+/Users/irayangirova/aga8_pvt_calculator/build/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libaga8_pvt_calculator.a CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o
+/usr/bin/ranlib libaga8_pvt_calculator.a

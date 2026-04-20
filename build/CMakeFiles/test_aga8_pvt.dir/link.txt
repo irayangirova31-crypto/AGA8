@@ -1,0 +1,1 @@
+/usr/bin/clang++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/test_aga8_pvt.dir/main.cpp.o -o test_aga8_pvt  libaga8_pvt_calculator.a
