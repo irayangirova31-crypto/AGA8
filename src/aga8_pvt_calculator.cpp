@@ -377,47 +377,83 @@ static double calculatePhi0(
         
         const auto& coeff = tables::IDEAL_COEFFS[i];
         
-        double term = coeff.A01 
-                    + coeff.A02 * tau 
-                    + coeff.B0 * std::log(tau)
-                    + coeff.C0 * std::log(std::sinh(coeff.D0 * tau))
-                    - coeff.E0 * std::log(std::cosh(coeff.F0 * tau))
-                    + coeff.G0 * std::log(std::sinh(coeff.H0 * tau))
-                    - coeff.I0 * std::log(std::cosh(coeff.J0 * tau))
-                    + std::log(x[i]);
+        double term = coeff.A01 + coeff.A02 * tau + coeff.B0 * std::log(tau);
+        
+        // Добавляем ln(x[i]) только если x[i] > 0
+        term += std::log(x[i]);
+        
+        // Члены с sinh/cosh - только если аргумент не ноль
+        if (coeff.D0 != 0.0 && coeff.D0 * tau > 0) {
+            term += coeff.C0 * std::log(std::sinh(coeff.D0 * tau));
+        }
+        
+        if (coeff.F0 != 0.0 && coeff.F0 * tau > 0) {
+            term -= coeff.E0 * std::log(std::cosh(coeff.F0 * tau));
+        }
+        
+        if (coeff.H0 != 0.0 && coeff.H0 * tau > 0) {
+            term += coeff.G0 * std::log(std::sinh(coeff.H0 * tau));
+        }
+        
+        if (coeff.J0 != 0.0 && coeff.J0 * tau > 0) {
+            term -= coeff.I0 * std::log(std::cosh(coeff.J0 * tau));
+        }
         
         phi0 += x[i] * term;
     }
     
+    // Проверка на NaN
+    if (std::isnan(phi0)) {
+        std::cout << "WARNING: phi0 is NaN!" << std::endl;
+        return 0.0;
+    }
+    
     return phi0;
 }
-
+// ============================================================================
+// Первая ПРОИЗВОДНАЯ φ_τ0 
+//
 static double calculatePhiTau0(double tau, const std::array<double, 22>& x) {
     double phiTau = 0.0;
+    
     for (int i = 1; i <= 21; ++i) {
         if (x[i] == 0.0) continue;
+        
         const auto& coeff = tables::IDEAL_COEFFS[i];
         
-        double term = coeff.A02
-                    + coeff.B0 / tau
-                    + coeff.C0 * coeff.D0 * std::cosh(coeff.D0 * tau) / std::sinh(coeff.D0 * tau)
-                    - coeff.E0 * coeff.F0 * std::sinh(coeff.F0 * tau) / std::cosh(coeff.F0 * tau)
-                    + coeff.G0 * coeff.H0 * std::cosh(coeff.H0 * tau) / std::sinh(coeff.H0 * tau)
-                    - coeff.I0 * coeff.J0 * std::sinh(coeff.J0 * tau) / std::cosh(coeff.J0 * tau);
+        double term = coeff.A02 + (coeff.B0 - 1) / tau;
+        
+        // Член с C0 и D0 - только если D0 != 0
+        if (coeff.D0 != 0.0) {
+            term += coeff.C0 * coeff.D0 * std::cosh(coeff.D0 * tau) / std::sinh(coeff.D0 * tau);
+        }
+        
+        // Член с E0 и F0 - только если F0 != 0
+        if (coeff.F0 != 0.0) {
+            term -= coeff.E0 * coeff.F0 * std::sinh(coeff.F0 * tau) / std::cosh(coeff.F0 * tau);
+        }
+        
+        // Член с G0 и H0 - только если H0 != 0
+        if (coeff.H0 != 0.0) {
+            term += coeff.G0 * coeff.H0 * std::cosh(coeff.H0 * tau) / std::sinh(coeff.H0 * tau);
+        }
+        
+        // Член с I0 и J0 - только если J0 != 0
+        if (coeff.J0 != 0.0) {
+            term -= coeff.I0 * coeff.J0 * std::sinh(coeff.J0 * tau) / std::cosh(coeff.J0 * tau);
+        }
         
         phiTau += x[i] * term;
     }
-    phiTau -= 1.0 / tau;  // производная от ln(τ₀/τ)
+    
     return phiTau;
 }
+
 
 // ============================================================================
 // ВТОРАЯ ПРОИЗВОДНАЯ φ_ττ0 = ∂²φ₀/∂τ² (для расчета Cv)
 // ============================================================================
-static double calculatePhiTauTau0(
-    double tau,
-    const std::array<double, 22>& x) {
-    
+static double calculatePhiTauTau0(double tau, const std::array<double, 22>& x) {
     double phiTauTau = 0.0;
     
     for (int i = 1; i <= 21; ++i) {
@@ -425,34 +461,282 @@ static double calculatePhiTauTau0(
         
         const auto& coeff = tables::IDEAL_COEFFS[i];
         
-        double Dtau = coeff.D0 * tau;
-        double Ftau = coeff.F0 * tau;
-        double Htau = coeff.H0 * tau;
-        double Jtau = coeff.J0 * tau;
+        double term = -(coeff.B0 - 1) / (tau * tau);
         
-        // d²/dτ² [B0·ln τ] = -B0/τ²
-        double term = -coeff.B0 / (tau * tau);
+        if (coeff.D0 != 0.0) {
+            double Dtau = coeff.D0 * tau;
+            term -= coeff.C0 * coeff.D0 * coeff.D0 / (std::sinh(Dtau) * std::sinh(Dtau));
+        }
         
-        // d²/dτ² [C0·ln(sinh(D0·τ))] = C0·D0² / sinh²(D0·τ)
-        term += coeff.C0 * coeff.D0 * coeff.D0 / (std::sinh(Dtau) * std::sinh(Dtau));
+        if (coeff.F0 != 0.0) {
+            double Ftau = coeff.F0 * tau;
+            term -= coeff.E0 * coeff.F0 * coeff.F0 / (std::cosh(Ftau) * std::cosh(Ftau));
+        }
         
-        // d²/dτ² [-E0·ln(cosh(F0·τ))] = -E0·F0² / cosh²(F0·τ)
-        term -= coeff.E0 * coeff.F0 * coeff.F0 / (std::cosh(Ftau) * std::cosh(Ftau));
+        if (coeff.H0 != 0.0) {
+            double Htau = coeff.H0 * tau;
+            term -= coeff.G0 * coeff.H0 * coeff.H0 / (std::sinh(Htau) * std::sinh(Htau));
+        }
         
-        // d²/dτ² [G0·ln(sinh(H0·τ))] = G0·H0² / sinh²(H0·τ)
-        term += coeff.G0 * coeff.H0 * coeff.H0 / (std::sinh(Htau) * std::sinh(Htau));
-        
-        // d²/dτ² [-I0·ln(cosh(J0·τ))] = -I0·J0² / cosh²(J0·τ)
-        term -= coeff.I0 * coeff.J0 * coeff.J0 / (std::cosh(Jtau) * std::cosh(Jtau));
+        if (coeff.J0 != 0.0) {
+            double Jtau = coeff.J0 * tau;
+            term -= coeff.I0 * coeff.J0 * coeff.J0 / (std::cosh(Jtau) * std::cosh(Jtau));
+        }
         
         phiTauTau += x[i] * term;
     }
     
-    // d²/dτ² [ln(τ₀/τ)] = d/dτ [-1/τ] = 1/τ²
-    phiTauTau += 1.0 / (tau * tau);
-    
     return phiTauTau;
 }
+// ============================================================================
+// ФУНКЦИЯ: τ·φ_τ = τ·(∂φ/∂τ) (уравнение C.2)
+// Используется для расчета H, S, U
+// ============================================================================
+static double calculateTauPhiTau(
+    double delta,
+    double tau,
+    double K,
+    const std::array<double, 59>& Cn,
+    const std::array<double, 19>& BnStar,
+    const std::array<double, 22>& x) {
+    
+    double K3 = K * K * K;
+    
+    // Член 1: τ·φ_0,τ (идеально-газовая часть)
+    double tauPhiTau0 = tau * calculatePhiTau0(tau, x);
+
+    // Член 2: (δ/K³)·Σ_{n=1}^{18} u_n·B_n*·τ^{u_n}
+    double sumBn = 0.0;
+    for (int n = 1; n <= 18; ++n) {
+        double un = tables::UN[n];
+        sumBn += un * BnStar[n] * std::pow(tau, un);
+    }
+    
+    // Член 3: -δ·Σ_{n=13}^{18} u_n·C_n·τ^{u_n}
+    double sumCn13_18 = 0.0;
+    for (int n = 13; n <= 18; ++n) {
+        double un = tables::UN[n];
+        sumCn13_18 += un * Cn[n] * std::pow(tau, un);
+    }
+    
+    // Член 4: Σ_{n=13}^{58} u_n·C_n·τ^{u_n}·δ^{b_n}·exp(-c_n·δ^{k_n})
+    double sumCn13_58 = 0.0;
+    for (int n = 13; n <= 58; ++n) {
+        double un = tables::UN[n];
+        int bn = tables::BN[n];
+        int cn = tables::CN[n];
+        int kn = tables::KN[n];
+        
+        sumCn13_58 += un * Cn[n] 
+                    * std::pow(tau, un)
+                    * std::pow(delta, bn)
+                    * std::exp(-cn * std::pow(delta, kn));
+    }
+    
+    return tauPhiTau0 + (delta / K3) * sumBn - delta * sumCn13_18 + sumCn13_58;
+}
+
+
+// ============================================================================
+// ФУНКЦИЯ: τ²·φ_ττ = τ²·(∂²φ/∂τ²) (уравнение C.3)
+// Используется для расчета Cv
+// ============================================================================
+
+static double calculateTau2PhiTauTau(
+    double delta,
+    double tau,
+    double K,
+    const std::array<double, 59>& Cn,
+    const std::array<double, 19>& BnStar,
+    const std::array<double, 22>& x) {
+    
+    double K3 = K * K * K;
+    
+    // Член 1: τ²·φ_0,ττ (идеально-газовая часть)
+    double tau2PhiTauTau0 = tau * tau * calculatePhiTauTau0(tau, x);
+    
+    // Член 2: (δ/K³)·Σ_{n=1}^{18} (u_n² - u_n)·B_n*·τ^{u_n}
+    double sumBn = 0.0;
+    for (int n = 1; n <= 18; ++n) {
+        double un = tables::UN[n];
+        sumBn += (un * un - un) * BnStar[n] * std::pow(tau, un);
+    }
+    
+    // Член 3: -δ·Σ_{n=13}^{18} (u_n² - u_n)·C_n·τ^{u_n}
+    double sumCn13_18 = 0.0;
+    for (int n = 13; n <= 18; ++n) {
+        double un = tables::UN[n];
+        sumCn13_18 += (un * un - un) * Cn[n] * std::pow(tau, un);
+    }
+    
+    // Член 4: Σ_{n=13}^{58} (u_n² - u_n)·C_n·τ^{u_n}·δ^{b_n}·exp(-c_n·δ^{k_n})
+    double sumCn13_58 = 0.0;
+    for (int n = 13; n <= 58; ++n) {
+        double un = tables::UN[n];
+        int bn = tables::BN[n];
+        int cn = tables::CN[n];
+        int kn = tables::KN[n];
+        
+        sumCn13_58 += (un * un - un) * Cn[n] 
+                    * std::pow(tau, un)
+                    * std::pow(delta, bn)
+                    * std::exp(-cn * std::pow(delta, kn));
+    }
+    
+    return tau2PhiTauTau0 + (delta / K3) * sumBn - delta * sumCn13_18 + sumCn13_58;
+}
+
+
+// ============================================================================
+// ФУНКЦИЯ: δ·φ_δ = δ·(∂φ/∂δ) (уравнение C.4)
+// Это фактор сжимаемости Z!
+// ============================================================================
+static double calculateDeltaPhiDelta(
+    double delta,
+    double tau,
+    double B,
+    double K,
+    const std::array<double, 59>& Cn) {
+    
+    double K3 = K * K * K;
+    
+    // Член 1: 1
+    double result = 1.0;
+    
+    // Член 2: B·δ/K³
+    result += B * delta / K3;
+    
+    // Член 3: -δ·Σ_{n=13}^{18} C_n·τ^{u_n}
+    double sumCn13_18 = 0.0;
+    for (int n = 13; n <= 18; ++n) {
+        double un = tables::UN[n];
+        sumCn13_18 += Cn[n] * std::pow(tau, un);
+    }
+    result -= delta * sumCn13_18;
+    
+    // Член 4: Σ_{n=13}^{58} C_n·τ^{u_n}·δ^{b_n}·(b_n - c_n·k_n·δ^{k_n})·exp(-c_n·δ^{k_n})
+    for (int n = 13; n <= 58; ++n) {
+        double un = tables::UN[n];
+        int bn = tables::BN[n];
+        int cn = tables::CN[n];
+        int kn = tables::KN[n];
+        
+        double deltaPowKn = std::pow(delta, kn);
+        double expTerm = std::exp(-cn * deltaPowKn);
+        
+        result += Cn[n] 
+                * std::pow(tau, un)
+                * std::pow(delta, bn)
+                * (bn - cn * kn * deltaPowKn)
+                * expTerm;
+    }
+    
+    return result;
+}
+
+// ============================================================================
+// ФУНКЦИЯ: Φ₁ = (δ²·φ_δ)_δ (уравнение C.5)
+// Используется для расчета Cp и w
+// ============================================================================
+static double calculatePhi1(
+    double delta,
+    double tau,
+    double B,
+    double K,
+    const std::array<double, 59>& Cn) {
+    
+    double K3 = K * K * K;
+    
+    // Член 1: 1
+    double result = 1.0;
+    
+    // Член 2: 2·B·δ/K³
+    result += 2.0 * B * delta / K3;
+    
+    // Член 3: -2·δ·Σ_{n=13}^{18} C_n·τ^{u_n}
+    double sumCn13_18 = 0.0;
+    for (int n = 13; n <= 18; ++n) {
+        double un = tables::UN[n];
+        sumCn13_18 += Cn[n] * std::pow(tau, un);
+    }
+    result -= 2.0 * delta * sumCn13_18;
+    
+    // Член 4: Σ C_n·τ^{u_n}·δ^{b_n}·[b_n - (1+k_n)·c_n·k_n·δ^{k_n} + (b_n - c_n·k_n·δ^{k_n})²]·exp(...)
+    for (int n = 13; n <= 58; ++n) {
+        double un = tables::UN[n];
+        int bn = tables::BN[n];
+        int cn = tables::CN[n];
+        int kn = tables::KN[n];
+        
+        double deltaPowKn = std::pow(delta, kn);
+        double expTerm = std::exp(-cn * deltaPowKn);
+        
+        double bracket = bn - (1.0 + kn) * cn * kn * deltaPowKn
+                       + std::pow(bn - cn * kn * deltaPowKn, 2);
+        
+        result += Cn[n] 
+                * std::pow(tau, un)
+                * std::pow(delta, bn)
+                * bracket
+                * expTerm;
+    }
+    
+    return result;
+}
+
+// ============================================================================
+// ФУНКЦИЯ: Φ₂ = -τ²·(δ·φ_δ/τ)_τ (уравнение C.6)
+// Используется для расчета Cp и μ
+// ============================================================================
+
+static double calculatePhi2(
+    double delta,
+    double tau,
+    double K,
+    const std::array<double, 59>& Cn,
+    const std::array<double, 19>& BnStar) {
+    
+    double K3 = K * K * K;
+    
+    // Член 1: 1
+    double result = 1.0;
+    
+    // Член 2: (δ/K³)·Σ_{n=1}^{18} (1-u_n)·B_n*·τ^{u_n}
+    double sumBn = 0.0;
+    for (int n = 1; n <= 18; ++n) {
+        double un = tables::UN[n];
+        sumBn += (1.0 - un) * BnStar[n] * std::pow(tau, un);
+    }
+    result += (delta / K3) * sumBn;
+    
+    // Член 3: -δ·Σ_{n=13}^{18} (1-u_n)·C_n·τ^{u_n}
+    double sumCn13_18 = 0.0;
+    for (int n = 13; n <= 18; ++n) {
+        double un = tables::UN[n];
+        sumCn13_18 += (1.0 - un) * Cn[n] * std::pow(tau, un);
+    }
+    result -= delta * sumCn13_18;
+    
+    // Член 4: Σ_{n=13}^{58} (1-u_n)·C_n·τ^{u_n}·δ^{b_n}·(b_n - c_n·k_n·δ^{k_n})·exp(-c_n·δ^{k_n})
+    for (int n = 13; n <= 58; ++n) {
+        double un = tables::UN[n];
+        int bn = tables::BN[n];
+        int cn = tables::CN[n];
+        int kn = tables::KN[n];
+        
+        double deltaPowKn = std::pow(delta, kn);
+        double expTerm = std::exp(-cn * deltaPowKn);
+        
+        result += (1.0 - un) * Cn[n] 
+                * std::pow(tau, un)
+                * std::pow(delta, bn)
+                * (bn - cn * kn * deltaPowKn)
+                * expTerm;
+    }
+    
+    return result;
+}
+
 
 // ============================================================================
 // РАСЧЕТ НЕИДЕАЛЬНОЙ СОСТАВЛЯЮЩЕЙ φᵣ (уравнение 11)
@@ -495,249 +779,6 @@ static double calculatePhiR(
     return phiR;
 }
 
-// ============================================================================
-// ПРОИЗВОДНАЯ φᵣ_δ = ∂φᵣ/∂δ (уравнение C.4)
-// ============================================================================
-static double calculatePhiRDelta(
-    double delta,
-    double tau,
-    double B,
-    double K,
-    const std::array<double, 59>& Cn) {
-    
-    double K3 = K * K * K;
-    
-    // Член 1: B/K³
-    double phiRDelta = B / K3;
-    
-    // Член 2: -Σ_{n=13}^{18} C_n·τ^{u_n}
-    double sumC13_18 = 0.0;
-    for (int n = 13; n <= 18; ++n) {
-        double un = tables::UN[n];
-        sumC13_18 += Cn[n] * std::pow(tau, un);
-    }
-    phiRDelta -= sumC13_18;
-    
-    // Член 3: производная от суммы
-    for (int n = 13; n <= 58; ++n) {
-        double un = tables::UN[n];
-        int bn = tables::BN[n];
-        int cn = tables::CN[n];
-        int kn = tables::KN[n];
-        
-        double deltaPowKn = std::pow(delta, kn);
-        double expTerm = std::exp(-cn * deltaPowKn);
-        
-        double term = Cn[n] 
-                    * std::pow(tau, un) 
-                    * std::pow(delta, bn - 1)
-                    * (bn - cn * kn * deltaPowKn)
-                    * expTerm;
-        
-        phiRDelta += term;
-    }
-    
-    return phiRDelta;
-}
-
-// ============================================================================
-// ПРОИЗВОДНАЯ φᵣ_τ = ∂φᵣ/∂τ (уравнение C.2)
-// ============================================================================
-static double calculatePhiRTau(
-    double delta,
-    double tau,
-    double B,
-    double K,
-    const std::array<double, 59>& Cn,
-    const std::array<double, 19>& BnStar) {
-    
-    double K3 = K * K * K;
-    
-    // Член 1: (∂B/∂τ)·δ/K³, где ∂B/∂τ = Σ B_n*·u_n·τ^{u_n-1}
-    double dBdtau = 0.0;
-    for (int n = 1; n <= 18; ++n) {
-        double un = tables::UN[n];
-        dBdtau += BnStar[n] * un * std::pow(tau, un - 1);
-    }
-    double phiRTau = dBdtau * delta / K3;
-    
-    // Член 2: -δ·Σ_{n=13}^{18} C_n·u_n·τ^{u_n-1}
-    double sumC13_18 = 0.0;
-    for (int n = 13; n <= 18; ++n) {
-        double un = tables::UN[n];
-        sumC13_18 += Cn[n] * un * std::pow(tau, un - 1);
-    }
-    phiRTau -= delta * sumC13_18;
-    
-    // Член 3: Σ_{n=13}^{58} C_n·u_n·τ^{u_n-1}·δ^{b_n}·exp(-c_n·δ^{k_n})
-    for (int n = 13; n <= 58; ++n) {
-        double un = tables::UN[n];
-        int bn = tables::BN[n];
-        int cn = tables::CN[n];
-        int kn = tables::KN[n];
-        
-        double term = Cn[n] 
-                    * un * std::pow(tau, un - 1)
-                    * std::pow(delta, bn)
-                    * std::exp(-cn * std::pow(delta, kn));
-        
-        phiRTau += term;
-    }
-    
-    return phiRTau;
-}
-
-// ============================================================================
-// ВТОРАЯ ПРОИЗВОДНАЯ φ_ττ = ∂²φ/∂τ² (уравнение C.3)
-// ============================================================================
-static double calculatePhiTauTau(
-    double delta,
-    double tau,
-    double B,
-    double K,
-    const std::array<double, 59>& Cn,
-    const std::array<double, 19>& BnStar) {
-    
-    double K3 = K * K * K;
-    
-    // Член 1: (∂²B/∂τ²)·δ/K³
-    double d2Bdtau2 = 0.0;
-    for (int n = 1; n <= 18; ++n) {
-        double un = tables::UN[n];
-        if (un > 0) {
-            d2Bdtau2 += BnStar[n] * un * (un - 1) * std::pow(tau, un - 2);
-        } else if (un < 0) {
-            // для отрицательных степеней
-            d2Bdtau2 += BnStar[n] * un * (un - 1) * std::pow(tau, un - 2);
-        }
-        // если un = 0, производная = 0
-    }
-    double phiTauTau = d2Bdtau2 * delta / K3;
-    
-    // Член 2: -δ·Σ_{n=13}^{18} C_n·u_n·(u_n-1)·τ^{u_n-2}
-    double sumC13_18 = 0.0;
-    for (int n = 13; n <= 18; ++n) {
-        double un = tables::UN[n];
-        sumC13_18 += Cn[n] * un * (un - 1) * std::pow(tau, un - 2);
-    }
-    phiTauTau -= delta * sumC13_18;
-    
-    // Член 3: Σ_{n=13}^{58} C_n·u_n·(u_n-1)·τ^{u_n-2}·δ^{b_n}·exp(-c_n·δ^{k_n})
-    for (int n = 13; n <= 58; ++n) {
-        double un = tables::UN[n];
-        int bn = tables::BN[n];
-        int cn = tables::CN[n];
-        int kn = tables::KN[n];
-        
-        double term = Cn[n] 
-                    * un * (un - 1) 
-                    * std::pow(tau, un - 2)
-                    * std::pow(delta, bn)
-                    * std::exp(-cn * std::pow(delta, kn));
-        
-        phiTauTau += term;
-    }
-    
-    return phiTauTau;
-}
-
-// ============================================================================
-// ВТОРАЯ ПРОИЗВОДНАЯ φ_δδ = ∂²φ/∂δ² (для Φ₁)
-// ============================================================================
-static double calculatePhiDeltaDelta(
-    double delta,
-    double tau,
-    double B,
-    double K,
-    const std::array<double, 59>& Cn) {
-    
-    double K3 = K * K * K;
-    
-    // Производная от первого члена: ∂/∂δ (B/K³) = 0
-    double phiDeltaDelta = 0.0;
-    
-    // Производная от второго члена: ∂/∂δ (-Σ C_n·τ^{u_n}) = 0
-    // (не зависит от δ)
-    
-    // Производная от третьего члена
-    for (int n = 13; n <= 58; ++n) {
-        double un = tables::UN[n];
-        int bn = tables::BN[n];
-        int cn = tables::CN[n];
-        int kn = tables::KN[n];
-        
-        double deltaPowKn = std::pow(delta, kn);
-        double expTerm = std::exp(-cn * deltaPowKn);
-        
-        // d/dδ [δ^{bn}·(bn - cn·kn·δ^{kn})·exp(-cn·δ^{kn})]
-        // это сложная производная, упрощаем:
-        double term = Cn[n] 
-                    * std::pow(tau, un)
-                    * std::pow(delta, bn - 2)
-                    * expTerm
-                    * (bn * (bn - 1) 
-                       - 2 * bn * cn * kn * deltaPowKn
-                       + cn * kn * (cn * kn + 1) * std::pow(delta, 2*kn)
-                       - cn * kn * (bn - 1) * deltaPowKn);
-        
-        phiDeltaDelta += term;
-    }
-    
-    return phiDeltaDelta;
-}
-
-// ============================================================================
-// СМЕШАННАЯ ПРОИЗВОДНАЯ φ_δτ = ∂²φ/∂δ∂τ (для Φ₂)
-// ============================================================================
-static double calculatePhiDeltaTau(
-    double delta,
-    double tau,
-    double B,
-    double K,
-    const std::array<double, 59>& Cn,
-    const std::array<double, 19>& BnStar) {
-    
-    double K3 = K * K * K;
-    
-    // Член 1: (∂B/∂τ)/K³
-    double dBdtau = 0.0;
-    for (int n = 1; n <= 18; ++n) {
-        double un = tables::UN[n];
-        dBdtau += BnStar[n] * un * std::pow(tau, un - 1);
-    }
-    double phiDeltaTau = dBdtau / K3;
-    
-    // Член 2: -Σ_{n=13}^{18} C_n·u_n·τ^{u_n-1}
-    double sumC13_18 = 0.0;
-    for (int n = 13; n <= 18; ++n) {
-        double un = tables::UN[n];
-        sumC13_18 += Cn[n] * un * std::pow(tau, un - 1);
-    }
-    phiDeltaTau -= sumC13_18;
-    
-    // Член 3: производная от суммы
-    for (int n = 13; n <= 58; ++n) {
-        double un = tables::UN[n];
-        int bn = tables::BN[n];
-        int cn = tables::CN[n];
-        int kn = tables::KN[n];
-        
-        double deltaPowKn = std::pow(delta, kn);
-        double expTerm = std::exp(-cn * deltaPowKn);
-        
-        double term = Cn[n] 
-                    * un * std::pow(tau, un - 1)
-                    * std::pow(delta, bn - 1)
-                    * (bn - cn * kn * deltaPowKn)
-                    * expTerm;
-        
-        phiDeltaTau += term;
-    }
-    
-    return phiDeltaTau;
-}
-
-
 double Aga8PvtCalculator::calculateMolarMass(const std::array<double, 22> &x) {
     double M = 0.0;
     for (int i = 1; i <= 21; ++i) {
@@ -769,76 +810,66 @@ static ThermodynamicProperties calculateAllProperties(
     
     // 1. Базовые величины
     double B = Aga8PvtCalculator::calculateB(tau, BnStar);
-    double Z = calculateZ(delta, tau, B, K, Cn);
     
-    // 2. Если давление не задано, вычисляем его
+    // 2. Расчет производных по формулам C.2 - C.6
+    double tauPhiTau = calculateTauPhiTau(delta, tau, K, Cn, BnStar, x);
+    double tau2PhiTauTau = calculateTau2PhiTauTau(delta, tau, K, Cn, BnStar, x);
+    double deltaPhiDelta = calculateDeltaPhiDelta(delta, tau, B, K, Cn);
+    double Phi1 = calculatePhi1(delta, tau, B, K, Cn);
+    double Phi2 = calculatePhi2(delta, tau, K, Cn, BnStar);
+    
+    // 3. Фактор сжимаемости Z (уравнение 17)
+    double Z = deltaPhiDelta;
+    
+    // 4. Если давление не задано, вычисляем его
     double p = pressureMpa;
     if (p < 0) {
-        p = calculatePressure(delta, tau, K, Z);
+        p = delta * R_MPa * L_K * Z / (tau * K3);
     }
     
-    // 3. Плотность
+    // 5. Плотность
     double rhoMol = delta / K3;
     double rhoMass = rhoMol * M;
     
-    // 4. Идеально-газовая составляющая и её производные
+    // 6. Полная свободная энергия φ (для энтропии)
     double phi0 = calculatePhi0(delta, tau, x);
-    double phiTau0 = calculatePhiTau0(tau, x);
-    double phiTauTau0 = calculatePhiTauTau0(tau, x);
-    
-    // 5. Неидеальная составляющая и её производные
     double phiR = calculatePhiR(delta, tau, B, K, Cn);
-    double phiRDelta = calculatePhiRDelta(delta, tau, B, K, Cn);
-    double phiRTau = calculatePhiRTau(delta, tau, B, K, Cn, BnStar);
-    double phiRTauTau = calculatePhiTauTau(delta, tau, B, K, Cn, BnStar);
-    double phiRDeltaDelta = calculatePhiDeltaDelta(delta, tau, B, K, Cn);
-    double phiRDeltaTau = calculatePhiDeltaTau(delta, tau, B, K, Cn, BnStar);
-    
-    // 6. Полные значения
     double phi = phi0 + phiR;
-    double phiDelta = phiRDelta;                    // φ₀ не зависит от δ
-    double phiTau = phiTau0 + phiRTau;
-    double phiTauTau = phiTauTau0 + phiRTauTau;
-    double phiDeltaDelta = phiRDeltaDelta;
-    double phiDeltaTau = phiRDeltaTau;
-    
-    // 7. Φ₁ и Φ₂
-    double Phi1 = 2.0 * delta * phiDelta + delta * delta * phiDeltaDelta;
-    double Phi2 = delta * phiDelta - tau * delta * phiDeltaTau;
-    
-    // 8. Термодинамические свойства
 
-    double uMolar = R_KJ * temperatureK * tau * phiTau;
-    double hMolar = R_KJ * temperatureK * (tau * phiTau + delta * phiDelta);
-    double sMolar = R_KJ * (tau * phiTau - phi);
-    double cvMolar = -R_KJ * tau * tau * phiTauTau;
-    double cpMolar = cvMolar + R_KJ * Phi2 * Phi2 / Phi1;
-    double kappa = cpMolar / cvMolar;
-    double mu = (Phi2 / Phi1 - 1.0) * R_KJ / (cpMolar * M) * temperatureK;
-    double w = std::sqrt(Z * kappa * R_KJ * 1000.0 * temperatureK / M);
+    // Проверка на nan после каждого шага
+    if (std::isnan(tauPhiTau)) std::cout << "★ NAN at tauPhiTau" << std::endl;
+    if (std::isnan(tau2PhiTauTau)) std::cout << "★ NAN at tau2PhiTauTau" << std::endl;
+    if (std::isnan(deltaPhiDelta)) std::cout << "★ NAN at deltaPhiDelta" << std::endl;
+    if (std::isnan(Phi1)) std::cout << "★ NAN at Phi1" << std::endl;
+    if (std::isnan(Phi2)) std::cout << "★ NAN at Phi2" << std::endl;
+    if (std::isnan(phi0)) std::cout << "★ NAN at phi0" << std::endl;
+    if (std::isnan(phiR)) std::cout << "★ NAN at phiR" << std::endl;
+
+    // 7. Термодинамические свойства
+    double uMolar = R_KJ * temperatureK * tauPhiTau;                              // (19)
+    double hMolar = R_KJ * temperatureK * (tauPhiTau + deltaPhiDelta);           // (20)
+    double sMolar = R_KJ * (tauPhiTau - phi);                                    // (21)
+    double cvMolar = -R_KJ * tau2PhiTauTau;                                      // (22)
+    double cpMolar = cvMolar + R_KJ * Phi2 * Phi2 / Phi1;                        // (23)
+    double kappa = (Phi1 / Z) * (cpMolar / cvMolar);                             // (25)
+    double mu = (Phi2 / Phi1 - 1.0) / (cpMolar * (p / (Z * R_KJ * temperatureK)));       // (24)
+    double w = std::sqrt(Z * kappa * R_KJ * 1000.0 * temperatureK / M);          // (26)
     
-    // 9. Заполнение структуры
+    // 8. Заполнение структуры
     ThermodynamicProperties props;
     props.compressibilityFactor = Z;
     props.massDensityKgPerM3 = rhoMass;
+    props.specificInternalEnergyKJPerKg = uMolar / M;
     props.specificEnthalpyKJPerKg = hMolar / M;
     props.specificEntropyKJPerKgK = sMolar / M;
     props.specificCvKJPerKgK = cvMolar / M;
     props.specificCpKJPerKgK = cpMolar / M;
+    props.jouleThomsonCoeffKPerMPa = mu;
     props.adiabaticExponent = kappa;
     props.speedOfSoundMPerS = w;
     props.molarMassKgPerKmol = M;
     props.molarEnthalpyKJPerKmol = hMolar;
-    props.specificInternalEnergyKJPerKg = uMolar / M;
-    props.jouleThomsonCoeffKPerMPa = mu;
-
     
-    std::cout << "DEBUG: Phi1 = " << Phi1 << std::endl;
-    std::cout << "DEBUG: Phi2 = " << Phi2 << std::endl;
-    std::cout << "DEBUG: Phi2^2/Phi1 = " << (Phi2 * Phi2 / Phi1) << std::endl;
-    std::cout << "DEBUG: cvMolar = " << cvMolar << std::endl;
-    std::cout << "DEBUG: cpMolar = " << cpMolar << std::endl;
-    std::cout << "DEBUG: kappa = " << kappa << std::endl;
     return props;
 }
 
