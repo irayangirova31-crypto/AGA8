@@ -1,19 +1,19 @@
 [
 {
   "directory": "/Users/irayangirova/aga8_pvt_calculator/build",
-  "command": "/usr/bin/clang++  -I/Users/irayangirova/aga8_pvt_calculator/include -I/Users/irayangirova/aga8_pvt_calculator/src -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp",
+  "command": "/usr/bin/clang++  -I/Users/irayangirova/aga8_pvt_calculator/include -I/Users/irayangirova/aga8_pvt_calculator/src -g -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp",
   "file": "/Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp",
   "output": "CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o"
 },
 {
   "directory": "/Users/irayangirova/aga8_pvt_calculator/build",
-  "command": "/usr/bin/clang++  -I/Users/irayangirova/aga8_pvt_calculator/include -I/Users/irayangirova/aga8_pvt_calculator/src -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp",
+  "command": "/usr/bin/clang++  -I/Users/irayangirova/aga8_pvt_calculator/include -I/Users/irayangirova/aga8_pvt_calculator/src -g -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp",
   "file": "/Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp",
   "output": "CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o"
 },
 {
   "directory": "/Users/irayangirova/aga8_pvt_calculator/build",
-  "command": "/usr/bin/clang++  -I/Users/irayangirova/aga8_pvt_calculator/include -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -o CMakeFiles/test_aga8_pvt.dir/main.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/main.cpp",
+  "command": "/usr/bin/clang++  -I/Users/irayangirova/aga8_pvt_calculator/include -g -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -o CMakeFiles/test_aga8_pvt.dir/main.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/main.cpp",
   "file": "/Users/irayangirova/aga8_pvt_calculator/main.cpp",
   "output": "CMakeFiles/test_aga8_pvt.dir/main.cpp.o"
 }

@@ -6,7 +6,7 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/Users/irayangirova/aga8_pvt_calculator/include
 
-CXX_FLAGSarm64 = -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic
+CXX_FLAGSarm64 = -g -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic
 
-CXX_FLAGS = -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic
+CXX_FLAGS = -g -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic
 
