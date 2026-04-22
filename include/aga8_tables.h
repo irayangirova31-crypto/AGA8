@@ -54,24 +54,10 @@ extern const std::array<IdealGasCoeffs, 22> IDEAL_COEFFS;
 
 // Таблица D.3 - Параметры бинарного взаимодействия (21x21).
 
-extern std::array<std::array<double, 22>, 22> EIJ;   // E_ij*
-extern std::array<std::array<double, 22>, 22> UIJ;   // U_ij (V_ij)
-extern std::array<std::array<double, 22>, 22> KIJ;   // K_ij
-extern std::array<std::array<double, 22>, 22> GIJ;   // G_ij*
-
-
-// Функция инициализации.
-
-void initializeTables();
-
-
-// Глобальные переменные для расчетов.
-
-extern double RGAS;
-extern double BI[19];
-extern double CNS[59];
-extern double K1;
-extern double U1;
+extern const std::array<std::array<double, 22>, 22> EIJ;   // E_ij*
+extern const std::array<std::array<double, 22>, 22> UIJ;   // U_ij (V_ij)
+extern const std::array<std::array<double, 22>, 22> KIJ;   // K_ij
+extern const std::array<std::array<double, 22>, 22> GIJ;   // G_ij*
 
 } // namespace tables
 } // namespace aga8_pvt

@@ -13,8 +13,8 @@ namespace aga8_pvt {
 
 static constexpr double R_KJ = 8.314510;        // кДж/(кмоль·К).
 static constexpr double R_MPa = 0.008314510;    // МПа·м³/(кмоль·К).
-static constexpr double L_K = 1.0;              // K.
-static constexpr double T0_K = 298.15;          // K.
+static constexpr double L_K = 1.0000;              // K.
+static constexpr double T0_K = 298.1500;          // K.
 static constexpr double P0_MPa = 0.101325;      // МПа.
 
 
@@ -78,7 +78,7 @@ static double calculateBijStar(int n, int i, int j) {
 
 // ФУНКЦИЯ 3: Расчет всех B_n* (уравнение D.2).
 
-static std::array<double, 19> calculateAllBnStar(const std::array<double, 22>& x) {
+std::array<double, 19> Aga8PvtCalculator::calculateAllBnStar(const std::array<double, 22>& x) {
     std::array<double, 19> BnStar = {0};  // индексы 1..18
     
     // Внешний цикл по n = 1..18
@@ -115,23 +115,6 @@ static std::array<double, 19> calculateAllBnStar(const std::array<double, 22>& x
 }
 
 
-// ПУБЛИЧНЫЙ МЕТОД: расчет B_n* для заданного состава.
-
-std::array<double, 19> Aga8PvtCalculator::calculateBnStar(const std::array<double, 22>& composition) {
-    return calculateAllBnStar(composition);
-}
-
-
-// ПРИМЕР: функция для отладки/тестирования
-
-void printBnStar(const std::array<double, 19>& BnStar) {
-    std::cout << std::scientific << std::setprecision(8);
-    std::cout << "\nB_n* coefficients\n";
-    for (int n = 1; n <= 18; ++n) {
-        std::cout << "n=" << std::setw(2) << n << " : " << BnStar[n] << std::endl;
-    }
-
-}
 
 // ФУНКЦИЯ: Расчет второго вириального коэффициента B(τ, X).
 // Уравнение D.1: B(τ, X) = Σ_{n=1}^{18} B_n* · τ^{u_n}.
@@ -220,7 +203,7 @@ static double calculateV(const std::array<double, 22>& x) {
 
 // РАСЧЕТ ВСЕХ C_n (уравнение D.6) для n = 13..58.
 
-static std::array<double, 59> calculateAllCn(const std::array<double, 22>& x) {
+std::array<double, 59> Aga8PvtCalculator::calculateAllCn(const std::array<double, 22>& x) {
     std::array<double, 59> Cn = {0};  // индексы 1..58.
     
     // Предварительные расчеты (зависят только от состава, не от n).
@@ -250,11 +233,6 @@ static std::array<double, 59> calculateAllCn(const std::array<double, 22>& x) {
     return Cn;
 }
 
-std::array<double, 59> Aga8PvtCalculator::calculateCn(const std::array<double, 22>& composition) {
-    // Рассчитываем все C_n для n = 13..58
-    auto Cn = calculateAllCn(composition);
-    return Cn;
-}
 
 // Расчет смесевого параметра размера K(X).
 double Aga8PvtCalculator::calculateK(const std::array<double, 22>& x){
@@ -345,7 +323,17 @@ static double calculatePressure(
 
 
 // РАСЧЕТ ИДЕАЛЬНО-ГАЗОВОЙ СОСТАВЛЯЮЩЕЙ φ₀ (уравнение B.3)
+double Aga8PvtCalculator::calculateMolarMass(const std::array<double, 22>& x) {
+    double M = 0.0;
+    for (int i = 1; i <= 21; ++i) {
+        M += x[i] * tables::MW[i];
+    }
+    return M;
+}
 
+double Aga8PvtCalculator::getMolarMass(const GasComposition& composition) {
+    return calculateMolarMass(composition.molarFractions);
+}
 static double calculatePhi0(
     double delta,
     double tau,
@@ -391,7 +379,6 @@ static double calculatePhi0(
     
     // Проверка на NaN
     if (std::isnan(phi0)) {
-        std::cout << "WARNING: phi0 is NaN!" << std::endl;
         return 0.0;
     }
     
@@ -764,17 +751,7 @@ static double calculatePhiR(
     return phiR;
 }
 
-double Aga8PvtCalculator::calculateMolarMass(const std::array<double, 22> &x) {
-    double M = 0.0;
-    for (int i = 1; i <= 21; ++i) {
-        M += x[i] * tables::MW[i];
-    }
-    return M;
-}
 
-double Aga8PvtCalculator::getMolarMass(const GasComposition& composition) {
-    return calculateMolarMass(composition.molarFractions);
-}
 
 
 // ЕДИНАЯ ФУНКЦИЯ: расчет всех термодинамических свойств по δ и T.
@@ -821,60 +798,49 @@ static ThermodynamicProperties calculateAllProperties(
     double phiR = calculatePhiR(delta, tau, B, K, Cn);
     double phi = phi0 + phiR;
 
-    // Проверка на nan после каждого шага.
-    if (std::isnan(tauPhiTau)) std::cout << "★ NAN at tauPhiTau" << std::endl;
-    if (std::isnan(tau2PhiTauTau)) std::cout << "★ NAN at tau2PhiTauTau" << std::endl;
-    if (std::isnan(deltaPhiDelta)) std::cout << "★ NAN at deltaPhiDelta" << std::endl;
-    if (std::isnan(Phi1)) std::cout << "★ NAN at Phi1" << std::endl;
-    if (std::isnan(Phi2)) std::cout << "★ NAN at Phi2" << std::endl;
-    if (std::isnan(phi0)) std::cout << "★ NAN at phi0" << std::endl;
-    if (std::isnan(phiR)) std::cout << "★ NAN at phiR" << std::endl;
 
     // 7. Термодинамические свойства.
-    double uMolar = R_KJ * temperatureK * tauPhiTau;                              // (19)
+    double uMolar = R_KJ * temperatureK * tauPhiTau;                             // (19)
     double hMolar = R_KJ * temperatureK * (tauPhiTau + deltaPhiDelta);           // (20)
     double sMolar = R_KJ * (tauPhiTau - phi);                                    // (21)
     double cvMolar = -R_KJ * tau2PhiTauTau;                                      // (22)
     double cpMolar = cvMolar + R_KJ * Phi2 * Phi2 / Phi1;                        // (23)
     double kappa = (Phi1 / Z) * (cpMolar / cvMolar);                             // (25)
-    double mu = (Phi2 / Phi1 - 1.0) / (cpMolar * (p / (Z * R_KJ * temperatureK)));       // (24)
+    double mu = (Phi2 / Phi1 - 1.0) / (cpMolar * (p / (Z * R_KJ * temperatureK)));// (24)
     double w = std::sqrt(Z * kappa * R_KJ * 1000.0 * temperatureK / M);          // (26)
     
     // 8. Заполнение структуры.
     ThermodynamicProperties props;
     props.compressibilityFactor = Z;
-    props.massDensityKgPerM3 = rhoMass;
-    props.specificInternalEnergyKJPerKg = uMolar / M;
-    props.specificEnthalpyKJPerKg = hMolar / M;
-    props.specificEntropyKJPerKgK = sMolar / M;
-    props.specificCvKJPerKgK = cvMolar / M;
-    props.specificCpKJPerKgK = cpMolar / M;
-    props.jouleThomsonCoeffKPerMPa = mu;
+    props.massDensity = rhoMass;
+    props.specificInternalEnergy = uMolar / M;
+    props.specificEnthalpy = hMolar / M;
+    props.specificEntropy = sMolar / M;
+    props.specificCv = cvMolar / M;
+    props.specificCp = cpMolar / M;
+    props.jouleThomsonCoeff = mu;
     props.adiabaticExponent = kappa;
-    props.speedOfSoundMPerS = w;
-    props.molarMassKgPerKmol = M;
-    props.molarEnthalpyKJPerKmol = hMolar;
+    props.speedOfSound = w;
+    props.molarMass = M;
+    props.molarEnthalpy = hMolar;
     
     return props;
 }
 
 void ThermodynamicProperties::print() const {
     std::cout << std::fixed << std::setprecision(4);
-    std::cout << "\n========================================" << std::endl;
     std::cout << "  Термодинамические свойства газа" << std::endl;
-    std::cout << "========================================" << std::endl;
     std::cout << "  Z = " << compressibilityFactor << std::endl;
-    std::cout << "  D = " << massDensityKgPerM3 << " кг/м³" << std::endl;
-    std::cout << "  U = " << specificInternalEnergyKJPerKg << " кДж/кг" << std::endl;
-    std::cout << "  H = " << specificEnthalpyKJPerKg << " кДж/кг" << std::endl;
-    std::cout << "  S = " << specificEntropyKJPerKgK << " кДж/(кг·К)" << std::endl;
-    std::cout << "  cv = " << specificCvKJPerKgK << " кДж/(кг·К)" << std::endl;
-    std::cout << "  cp = " << specificCpKJPerKgK << " кДж/(кг·К)" << std::endl;
-    std::cout << "  μ = " << jouleThomsonCoeffKPerMPa << " К/МПа" << std::endl;
+    std::cout << "  D = " << massDensity << " кг/м³" << std::endl;
+    std::cout << "  U = " << specificInternalEnergy << " кДж/кг" << std::endl;
+    std::cout << "  H = " << specificEnthalpy << " кДж/кг" << std::endl;
+    std::cout << "  S = " << specificEntropy << " кДж/(кг·К)" << std::endl;
+    std::cout << "  cv = " << specificCv << " кДж/(кг·К)" << std::endl;
+    std::cout << "  cp = " << specificCp << " кДж/(кг·К)" << std::endl;
+    std::cout << "  μ = " << jouleThomsonCoeff << " К/МПа" << std::endl;
     std::cout << "  κ = " << adiabaticExponent << std::endl;
-    std::cout << "  w = " << speedOfSoundMPerS << " м/с" << std::endl;
-    std::cout << "  M = " << molarMassKgPerKmol << " кг/кмоль" << std::endl;
-    std::cout << "========================================" << std::endl;
+    std::cout << "  w = " << speedOfSound << " м/с" << std::endl;
+    std::cout << "  M = " << molarMass << " кг/кмоль" << std::endl;
 }
 
 // ФУНКЦИЯ: Итерационное решение для δ по заданному давлению.
@@ -897,10 +863,6 @@ static double solveForDeltaFromPressure(
     const double tolerance = 1e-8;   // точность по давлению, МПа.
     const int maxIter = 50;
     
-    std::cout << "\n=== Итерационный расчет δ ===" << std::endl;
-    std::cout << "Целевое давление: " << pressureMpa << " МПа" << std::endl;
-    std::cout << "Температура: " << temperatureK << " K" << std::endl;
-    std::cout << std::scientific << std::setprecision(10);
     
     for (int iter = 0; iter < maxIter; ++iter) {
         // 1. Рассчитываем Z по текущему δ.
@@ -912,24 +874,14 @@ static double solveForDeltaFromPressure(
         // 3. Вычисляем ошибку.
         double error = pCalc - pressureMpa;
         
-        std::cout << "Итерация " << iter + 1 
-                  << ": δ = " << delta 
-                  << ", p_calc = " << pCalc 
-                  << ", error = " << error << std::endl;
-        
         // 4. Проверка сходимости.
         if (std::abs(error) < tolerance) {
-            std::cout << "Сходимость достигнута за " << iter + 1 << " итераций" << std::endl;
             break;
         }
         
         // 5. Коррекция δ (метод простой итерации).
         delta = delta * pressureMpa / pCalc;
     }
-    
-    std::cout << "Финальное δ = " << delta << std::endl;
-    std::cout << "===============================" << std::endl;
-    
     return delta;
 }
 
@@ -962,8 +914,8 @@ ThermodynamicProperties Aga8PvtCalculator::calculateFromPressure(
     }
     
     // 2. Рассчитываем коэффициенты.
-    auto BnStar = calculateBnStar(composition.molarFractions);
-    auto Cn = calculateCn(composition.molarFractions);
+    auto BnStar = Aga8PvtCalculator::calculateAllBnStar(composition.molarFractions);
+    auto Cn = Aga8PvtCalculator::calculateAllCn(composition.molarFractions);
     double K = calculateK(composition.molarFractions);
     
     // 3. Итерационное решение для δ
@@ -996,10 +948,10 @@ ThermodynamicProperties Aga8PvtCalculator::calculateFromDensity(
     }
     
 
-    auto BnStar = calculateBnStar(composition.molarFractions);
-    auto Cn = calculateCn(composition.molarFractions);
-    double K = calculateK(composition.molarFractions);
-    double M = calculateMolarMass(composition.molarFractions);
+    auto BnStar = Aga8PvtCalculator::calculateAllBnStar(composition.molarFractions);
+    auto Cn = Aga8PvtCalculator::calculateAllCn(composition.molarFractions);
+    double K = Aga8PvtCalculator::calculateK(composition.molarFractions);
+    double M = getMolarMass(composition);
     
     // 3. ПРЯМОЙ РАСЧЕТ δ.
     //δ = D · K³ / M
