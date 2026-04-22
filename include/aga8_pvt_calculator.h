@@ -6,7 +6,7 @@
 namespace aga8_pvt {
 
 struct GasComposition {
-    std::array<double, 22> molarFractions{};  // индексы 1..21
+    std::array<double, 22> molarFractions{};  // индексы 1..21.
     bool isValid(double tolerance = 1e-6) const;
 };
 
@@ -28,19 +28,19 @@ struct ThermodynamicProperties {
 
 class Aga8PvtCalculator {
 public:
-    // Расчет B_n* для заданного состава
+    // Расчет B_n* для заданного состава.
     static std::array<double, 19> calculateBnStar(const std::array<double, 22>& composition);
     
-    //Расчет второго вириального коэффициента B(τ, X)
+    //Расчет второго вириального коэффициента B(τ, X).
     static double calculateB(double tau, const std::array<double, 19>& BnStar);
     
-    //Расчет всех C_n для заданного состава 
+    //Расчет всех C_n для заданного состава. 
     static std::array<double, 59> calculateCn(const std::array<double, 22>& composition);
     
-    // Расчет смесевого параметра размера K(X)
+    // Расчет смесевого параметра размера K(X).
     static double calculateK(const std::array<double, 22>& composition);
     
-    // Вспомогательные методы
+    // Вспомогательные методы.
     static double getMolarMass(const GasComposition& composition);
 
     static ThermodynamicProperties calculateFromPressure(const GasComposition& composition, double pressureMpa,
@@ -54,6 +54,6 @@ public:
     static double calculateMolarMass(const std::array<double, 22>& x);
 };
 
-} // namespace aga8_pvt
+} // namespace aga8_pvt.
 
 #endif
