@@ -130,24 +130,37 @@ aga8_pvt_calculator/fast:
 .PHONY : aga8_pvt_calculator/fast
 
 #=============================================================================
-# Target rules for targets named test_aga8_pvt
+# Target rules for targets named aga8_demo
 
 # Build rule for target.
-test_aga8_pvt: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test_aga8_pvt
-.PHONY : test_aga8_pvt
+aga8_demo: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 aga8_demo
+.PHONY : aga8_demo
 
 # fast build rule for target.
-test_aga8_pvt/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_aga8_pvt.dir/build.make CMakeFiles/test_aga8_pvt.dir/build
-.PHONY : test_aga8_pvt/fast
+aga8_demo/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_demo.dir/build.make CMakeFiles/aga8_demo.dir/build
+.PHONY : aga8_demo/fast
+
+#=============================================================================
+# Target rules for targets named aga8_tests
+
+# Build rule for target.
+aga8_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 aga8_tests
+.PHONY : aga8_tests
+
+# fast build rule for target.
+aga8_tests/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_tests.dir/build.make CMakeFiles/aga8_tests.dir/build
+.PHONY : aga8_tests/fast
 
 main.o: main.cpp.o
 .PHONY : main.o
 
 # target to build an object file
 main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_aga8_pvt.dir/build.make CMakeFiles/test_aga8_pvt.dir/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_demo.dir/build.make CMakeFiles/aga8_demo.dir/main.cpp.o
 .PHONY : main.cpp.o
 
 main.i: main.cpp.i
@@ -155,7 +168,7 @@ main.i: main.cpp.i
 
 # target to preprocess a source file
 main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_aga8_pvt.dir/build.make CMakeFiles/test_aga8_pvt.dir/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_demo.dir/build.make CMakeFiles/aga8_demo.dir/main.cpp.i
 .PHONY : main.cpp.i
 
 main.s: main.cpp.s
@@ -163,7 +176,7 @@ main.s: main.cpp.s
 
 # target to generate assembly for a file
 main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test_aga8_pvt.dir/build.make CMakeFiles/test_aga8_pvt.dir/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_demo.dir/build.make CMakeFiles/aga8_demo.dir/main.cpp.s
 .PHONY : main.cpp.s
 
 src/aga8_pvt_calculator.o: src/aga8_pvt_calculator.cpp.o
@@ -214,6 +227,30 @@ src/aga8_tables.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_pvt_calculator.dir/build.make CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.s
 .PHONY : src/aga8_tables.cpp.s
 
+test_aga8.o: test_aga8.cpp.o
+.PHONY : test_aga8.o
+
+# target to build an object file
+test_aga8.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_tests.dir/build.make CMakeFiles/aga8_tests.dir/test_aga8.cpp.o
+.PHONY : test_aga8.cpp.o
+
+test_aga8.i: test_aga8.cpp.i
+.PHONY : test_aga8.i
+
+# target to preprocess a source file
+test_aga8.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_tests.dir/build.make CMakeFiles/aga8_tests.dir/test_aga8.cpp.i
+.PHONY : test_aga8.cpp.i
+
+test_aga8.s: test_aga8.cpp.s
+.PHONY : test_aga8.s
+
+# target to generate assembly for a file
+test_aga8.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aga8_tests.dir/build.make CMakeFiles/aga8_tests.dir/test_aga8.cpp.s
+.PHONY : test_aga8.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -222,8 +259,9 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... aga8_demo"
 	@echo "... aga8_pvt_calculator"
-	@echo "... test_aga8_pvt"
+	@echo "... aga8_tests"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
@@ -233,6 +271,9 @@ help:
 	@echo "... src/aga8_tables.o"
 	@echo "... src/aga8_tables.i"
 	@echo "... src/aga8_tables.s"
+	@echo "... test_aga8.o"
+	@echo "... test_aga8.i"
+	@echo "... test_aga8.s"
 .PHONY : help
 
 

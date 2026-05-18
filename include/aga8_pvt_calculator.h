@@ -33,7 +33,7 @@ namespace aga8_pvt {
 //  20    | Гелий              | He
 //  21    | Аргон              | Ar
 //
-// Пример использования:
+// Пример использования:git push origin main --force
 //   GasComposition comp;
 //   comp.molarFractions[3] = 0.95;   // 95% метана
 //   comp.molarFractions[4] = 0.03;   // 3% этана

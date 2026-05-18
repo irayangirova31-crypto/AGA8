@@ -76,29 +76,29 @@ CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o: CMakeFiles/aga
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o: /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o: CMakeFiles/aga8_pvt_calculator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/irayangirova/aga8_pvt_calculator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o -MF CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o.d -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o -MF CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o.d -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp
 
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp > CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp > CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.i
 
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/irayangirova/aga8_pvt_calculator/src/aga8_pvt_calculator.cpp -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_pvt_calculator.cpp.s
 
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o: CMakeFiles/aga8_pvt_calculator.dir/flags.make
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o: /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o: CMakeFiles/aga8_pvt_calculator.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/irayangirova/aga8_pvt_calculator/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o -MF CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o.d -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o -MF CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o.d -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.o -c /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp
 
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp > CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp > CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.i
 
 CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/irayangirova/aga8_pvt_calculator/src/aga8_tables.cpp -o CMakeFiles/aga8_pvt_calculator.dir/src/aga8_tables.cpp.s
 
 # Object files for target aga8_pvt_calculator
 aga8_pvt_calculator_OBJECTS = \
